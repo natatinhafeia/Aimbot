@@ -1,49 +1,4 @@
--- Mini Cena de Entrada
-local function ShowIntroScreen()
-    -- Criando a interface de entrada
-    local introGui = Instance.new("ScreenGui")
-    introGui.Parent = game.CoreGui
-
-    -- Criando a tela de fundo
-    local background = Instance.new("Frame")
-    background.Size = UDim2.new(1, 0, 1, 0)
-    background.Position = UDim2.new(0, 0, 0, 0)
-    background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    background.BackgroundTransparency = 0.5
-    background.Parent = introGui
-
-    -- Criando o texto de boas-vindas
-    local welcomeText = Instance.new("TextLabel")
-    welcomeText.Size = UDim2.new(0, 400, 0, 50)
-    welcomeText.Position = UDim2.new(0.5, -200, 0.5, -25)
-    welcomeText.Text = "Bem-vindo ao Aimbot!"
-    welcomeText.TextColor3 = Color3.fromRGB(255, 255, 255)
-    welcomeText.BackgroundTransparency = 1
-    welcomeText.TextSize = 30
-    welcomeText.Parent = introGui
-
-    -- Criando o logo ou título, se quiser
-    local logoText = Instance.new("TextLabel")
-    logoText.Size = UDim2.new(0, 300, 0, 50)
-    logoText.Position = UDim2.new(0.5, -150, 0.6, 0)
-    logoText.Text = "Hixzin Aimbot"
-    logoText.TextColor3 = Color3.fromRGB(255, 0, 0)
-    logoText.BackgroundTransparency = 1
-    logoText.TextSize = 35
-    logoText.Parent = introGui
-
-    -- Criando a animação de desaparecimento (Delay antes de desaparecer)
-    wait(3) -- Exibe por 3 segundos
-
-    -- Remover a tela de entrada
-    introGui:Destroy()
-end
-
--- Chama a cena de entrada quando o script é iniciado
-ShowIntroScreen()
-
--- Aimbot, Fly, FOV, e Interface Móvel com design bonito e movimentação suave para o Aimbot
-
+-- Inicialização e Definições
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
@@ -58,7 +13,7 @@ local TargetPlayer = nil
 local FlySpeed = 50 -- Velocidade do voo
 local BodyVelocity = Instance.new("BodyVelocity")
 
--- Função para desenhar FOV
+-- Funções Auxiliares
 local function DrawFOV()
     if FOVCircle then
         FOVCircle:Remove()
@@ -72,7 +27,6 @@ local function DrawFOV()
     FOVCircle.Parent = game.CoreGui
 end
 
--- Função de Aimbot Suavizado
 local function SmoothAimbot(targetPosition)
     local currentPosition = Camera.CFrame.Position
     local direction = (targetPosition - currentPosition).unit
@@ -131,9 +85,22 @@ local function Fly()
     end
 end
 
--- Interface Gráfica (GUI) e Botões
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Parent = game.CoreGui
+-- Função para inicializar a mini cena de entrada
+local function ShowIntro()
+    local introGui = Instance.new("ScreenGui")
+    introGui.Parent = game.CoreGui
+    local introLabel = Instance.new("TextLabel")
+    introLabel.Size = UDim2.new(1, 0, 1, 0)
+    introLabel.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    introLabel.BackgroundTransparency = 0.5
+    introLabel.Text = "Bem-vindo! Iniciando..."
+    introLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    introLabel.TextSize = 50
+    introLabel.TextWrapped = true
+    introLabel.Parent = introGui
+    wait(3)
+    introGui:Destroy()
+end
 
 -- Função para criar botões com estilo bonito
 local function CreateButton(text, position, callback)
@@ -154,6 +121,14 @@ end
 local function UpdateButtonText(button, isEnabled)
     button.Text = isEnabled and "Desligar" or "Ligar"
 end
+
+-- Interface Gráfica (GUI) e Botões
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = game.CoreGui
+ScreenGui.ResetOnSpawn = false  -- Mantém a interface após morrer
+
+-- Centraliza o menu ao abrir
+ScreenGui.Position = UDim2.new(0.5, -250, 0.5, -150) -- Ajuste o valor para centralizar corretamente
 
 -- Botão de Aimbot
 local aimbotButton = CreateButton("Aimbot: OFF", UDim2.new(0.5, -100, 0.7, 0), function()
@@ -203,8 +178,9 @@ ScreenGui.Selectable = true
 
 ScreenGui.BackgroundTransparency = 0.7  -- 70% Transparente
 
+-- Função para arrastar com toque (para dispositivos móveis)
 ScreenGui.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
         dragStart = input.Position
         startPos = ScreenGui.Position
@@ -219,12 +195,15 @@ ScreenGui.InputBegan:Connect(function(input)
 end)
 
 ScreenGui.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = false
     end
 end)
 
--- Loop para encontrar o alvo e ativar aimbot e fly
+-- Mostrar a mini cena de entrada
+ShowIntro()
+
+-- Loop Principal (para Aimbot, Fly e FOV)
 while true do
     wait(0.1)
     if FOVEnabled then
