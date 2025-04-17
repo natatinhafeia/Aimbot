@@ -1,3 +1,47 @@
+-- Mini Cena de Entrada
+local function ShowIntroScreen()
+    -- Criando a interface de entrada
+    local introGui = Instance.new("ScreenGui")
+    introGui.Parent = game.CoreGui
+
+    -- Criando a tela de fundo
+    local background = Instance.new("Frame")
+    background.Size = UDim2.new(1, 0, 1, 0)
+    background.Position = UDim2.new(0, 0, 0, 0)
+    background.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    background.BackgroundTransparency = 0.5
+    background.Parent = introGui
+
+    -- Criando o texto de boas-vindas
+    local welcomeText = Instance.new("TextLabel")
+    welcomeText.Size = UDim2.new(0, 400, 0, 50)
+    welcomeText.Position = UDim2.new(0.5, -200, 0.5, -25)
+    welcomeText.Text = "Bem-vindo ao Aimbot!"
+    welcomeText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    welcomeText.BackgroundTransparency = 1
+    welcomeText.TextSize = 30
+    welcomeText.Parent = introGui
+
+    -- Criando o logo ou título, se quiser
+    local logoText = Instance.new("TextLabel")
+    logoText.Size = UDim2.new(0, 300, 0, 50)
+    logoText.Position = UDim2.new(0.5, -150, 0.6, 0)
+    logoText.Text = "Hixzin Aimbot"
+    logoText.TextColor3 = Color3.fromRGB(255, 0, 0)
+    logoText.BackgroundTransparency = 1
+    logoText.TextSize = 35
+    logoText.Parent = introGui
+
+    -- Criando a animação de desaparecimento (Delay antes de desaparecer)
+    wait(3) -- Exibe por 3 segundos
+
+    -- Remover a tela de entrada
+    introGui:Destroy()
+end
+
+-- Chama a cena de entrada quando o script é iniciado
+ShowIntroScreen()
+
 -- Aimbot, Fly, FOV, e Interface Móvel com design bonito e movimentação suave para o Aimbot
 
 local Players = game:GetService("Players")
@@ -134,15 +178,6 @@ local fovButton = CreateButton("FOV: OFF", UDim2.new(0.5, -100, 0.9, 0), functio
         end
     end
     UpdateButtonText(fovButton, FOVEnabled)
-end)
-
--- Botão para escolher a parte do corpo
-local partButton = CreateButton("Selecionar Parte: Head", UDim2.new(0.5, -100, 1, 0), function()
-    local parts = {"Head", "Torso", "Closest Part"}
-    local partIndex = table.find(parts, AimbotPart) or 1
-    partIndex = partIndex % #parts + 1
-    AimbotPart = parts[partIndex]
-    partButton.Text = "Selecionar Parte: " .. AimbotPart
 end)
 
 -- Função de maximizar/minimizar
