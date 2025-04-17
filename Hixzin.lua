@@ -1,4 +1,4 @@
--- Aimbot, Fly, FOV, e Interface Móvel com design bonito e sem suavização (teleporte direto)
+-- Aimbot, Fly, FOV, e Interface Móvel com design bonito e movimentação suave para o Aimbot
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -23,14 +23,17 @@ local function DrawFOV()
     FOVCircle.Size = UDim2.new(0, FOVRadius * 2, 0, FOVRadius * 2)
     FOVCircle.Position = UDim2.new(0.5, -FOVRadius, 0.5, -FOVRadius)
     FOVCircle.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-    FOVCircle.BackgroundTransparency = 0.5
+    FOVCircle.BackgroundTransparency = 0.5  -- Transparência de 50%
     FOVCircle.BorderSizePixel = 0
     FOVCircle.Parent = game.CoreGui
 end
 
--- Função de Aimbot Teleportado (sem suavização)
-local function TeleportAimbot(targetPosition)
-    Camera.CFrame = CFrame.new(targetPosition)  -- Teleporta diretamente para o alvo
+-- Função de Aimbot Suavizado
+local function SmoothAimbot(targetPosition)
+    local currentPosition = Camera.CFrame.Position
+    local direction = (targetPosition - currentPosition).unit
+    local newPosition = currentPosition + direction * 5  -- Ajuste a distância de cada movimento
+    Camera.CFrame = CFrame.new(newPosition, targetPosition)  -- Movimenta suavemente em direção ao alvo
 end
 
 -- Função para encontrar o melhor alvo
@@ -50,12 +53,12 @@ local function FindTarget()
     end
 end
 
--- Função do Aimbot
+-- Função de Aimbot
 local function Aimbot()
     if AimbotEnabled and TargetPlayer and TargetPlayer.Character then
         local target = TargetPlayer.Character:FindFirstChild(AimbotPart)
         if target then
-            TeleportAimbot(target.Position)  -- Teleporta diretamente para o alvo
+            SmoothAimbot(target.Position)  -- Movimenta suavemente em direção ao alvo
         end
     end
 end
@@ -100,22 +103,28 @@ local function CreateButton(text, position, callback)
     button.BorderColor3 = Color3.fromRGB(255, 255, 255)
     button.Parent = ScreenGui
     button.MouseButton1Click:Connect(callback)
+    return button
+end
+
+-- Função para atualizar o texto do botão
+local function UpdateButtonText(button, isEnabled)
+    button.Text = isEnabled and "Desligar" or "Ligar"
 end
 
 -- Botão de Aimbot
-CreateButton("Toggle Aimbot", UDim2.new(0.5, -100, 0.7, 0), function()
+local aimbotButton = CreateButton("Aimbot: OFF", UDim2.new(0.5, -100, 0.7, 0), function()
     AimbotEnabled = not AimbotEnabled
-    CreateButton("Toggle Aimbot", UDim2.new(0.5, -100, 0.7, 0), function() end).Text = AimbotEnabled and "Aimbot ON" or "Aimbot OFF"
+    UpdateButtonText(aimbotButton, AimbotEnabled)
 end)
 
 -- Botão de Fly
-CreateButton("Toggle Fly", UDim2.new(0.5, -100, 0.8, 0), function()
+local flyButton = CreateButton("Fly: OFF", UDim2.new(0.5, -100, 0.8, 0), function()
     FlyEnabled = not FlyEnabled
-    CreateButton("Toggle Fly", UDim2.new(0.5, -100, 0.8, 0), function() end).Text = FlyEnabled and "Fly ON" or "Fly OFF"
+    UpdateButtonText(flyButton, FlyEnabled)
 end)
 
 -- Botão de FOV
-CreateButton("Toggle FOV", UDim2.new(0.5, -100, 0.9, 0), function()
+local fovButton = CreateButton("FOV: OFF", UDim2.new(0.5, -100, 0.9, 0), function()
     FOVEnabled = not FOVEnabled
     if FOVEnabled then
         DrawFOV()
@@ -124,25 +133,40 @@ CreateButton("Toggle FOV", UDim2.new(0.5, -100, 0.9, 0), function()
             FOVCircle:Remove()
         end
     end
-    CreateButton("Toggle FOV", UDim2.new(0.5, -100, 0.9, 0), function() end).Text = FOVEnabled and "FOV ON" or "FOV OFF"
+    UpdateButtonText(fovButton, FOVEnabled)
 end)
 
 -- Botão para escolher a parte do corpo
-CreateButton("Select Aimbot Part", UDim2.new(0.5, -100, 1, 0), function()
+local partButton = CreateButton("Selecionar Parte: Head", UDim2.new(0.5, -100, 1, 0), function()
     local parts = {"Head", "Torso", "Closest Part"}
     local partIndex = table.find(parts, AimbotPart) or 1
     partIndex = partIndex % #parts + 1
     AimbotPart = parts[partIndex]
-    CreateButton("Select Aimbot Part", UDim2.new(0.5, -100, 1, 0), function() end).Text = "Aim at: " .. AimbotPart
+    partButton.Text = "Selecionar Parte: " .. AimbotPart
 end)
 
--- Tornar a interface móvel
+-- Função de maximizar/minimizar
+local isMenuVisible = true
+local maximizeButton = CreateButton("Minimizar", UDim2.new(0.5, -100, 0.6, 0), function()
+    isMenuVisible = not isMenuVisible
+    if isMenuVisible then
+        ScreenGui.Enabled = true
+        maximizeButton.Text = "Minimizar"
+    else
+        ScreenGui.Enabled = false
+        maximizeButton.Text = "Maximizar"
+    end
+end)
+
+-- Tornar a interface móvel e ajustar a transparência
 local dragSpeed = 0.2
 local dragging, dragInput, dragStart, startPos = nil, nil, nil, nil
 
 ScreenGui.Draggable = true
 ScreenGui.Active = true
 ScreenGui.Selectable = true
+
+ScreenGui.BackgroundTransparency = 0.7  -- 70% Transparente
 
 ScreenGui.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
