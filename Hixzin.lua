@@ -1,4 +1,4 @@
--- Aimbot, Fly, FOV, e Interface Móvel com design bonito
+-- Aimbot, Fly, FOV, e Interface Móvel com design bonito e sem suavização (teleporte direto)
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -28,6 +28,11 @@ local function DrawFOV()
     FOVCircle.Parent = game.CoreGui
 end
 
+-- Função de Aimbot Teleportado (sem suavização)
+local function TeleportAimbot(targetPosition)
+    Camera.CFrame = CFrame.new(targetPosition)  -- Teleporta diretamente para o alvo
+end
+
 -- Função para encontrar o melhor alvo
 local function FindTarget()
     local closestDistance = math.huge
@@ -50,7 +55,7 @@ local function Aimbot()
     if AimbotEnabled and TargetPlayer and TargetPlayer.Character then
         local target = TargetPlayer.Character:FindFirstChild(AimbotPart)
         if target then
-            Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Position)
+            TeleportAimbot(target.Position)  -- Teleporta diretamente para o alvo
         end
     end
 end
@@ -129,6 +134,35 @@ CreateButton("Select Aimbot Part", UDim2.new(0.5, -100, 1, 0), function()
     partIndex = partIndex % #parts + 1
     AimbotPart = parts[partIndex]
     CreateButton("Select Aimbot Part", UDim2.new(0.5, -100, 1, 0), function() end).Text = "Aim at: " .. AimbotPart
+end)
+
+-- Tornar a interface móvel
+local dragSpeed = 0.2
+local dragging, dragInput, dragStart, startPos = nil, nil, nil, nil
+
+ScreenGui.Draggable = true
+ScreenGui.Active = true
+ScreenGui.Selectable = true
+
+ScreenGui.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = ScreenGui.Position
+        input.Changed:Connect(function()
+            if not input.UserInputState == Enum.UserInputState.Change then return end
+            if dragging then
+                local delta = input.Position - dragStart
+                ScreenGui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            end
+        end)
+    end
+end)
+
+ScreenGui.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = false
+    end
 end)
 
 -- Loop para encontrar o alvo e ativar aimbot e fly
